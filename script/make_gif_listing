@@ -1,6 +1,6 @@
 #! /usr/bin/env ruby
 
-require 'builder'
+require 'yaml'
 
 def dir_blacklist
   ["css", "sass", "script"]
@@ -17,29 +17,22 @@ def get_gif_dirs
   Dir.foreach(".").map { |f| f unless useless?(f) }.compact
 end
 
-list = Builder::XmlMarkup.new(
-  target: File.open("_includes/gif-listing.html", 'w'),
-  indent: 0,
-  margin: 0
-)
+def liquid_info_for_file(dir, filename)
+  path = File.join(filename)
+  {
+    "path"          => path,
+    "modified_time" => File.mtime(path).to_i,
+    "extname"       => File.extname(path)
+  }
+end
 
 dirs = get_gif_dirs
+files = []
 
-list.ul do |builder|
-  dirs.each do |dir|
-    builder.li do |dir_element|
-      dir_element.text!(dir)
-      dir_element.ul do |ul|
-        Dir.glob("#{dir}/*.gif") do |gif|
-          ul.li do |li|
-            li.a(
-              File.basename(gif),
-              "href"  => gif,
-              "title" => gif
-            )
-          end
-        end
-      end
-    end
+dirs.each do |dir|
+  Dir.glob("#{dir}/*.gif") do |gif|
+    files << liquid_info_for_file(dir, gif)
   end
 end
+
+File.open("_data/static_files.yml", 'w') { |f| f.write(YAML.dump(files)) }
