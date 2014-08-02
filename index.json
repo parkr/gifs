@@ -1,4 +1,4 @@
 ---
 ---
 
-{{ site.data.static_files | jsonify }}
+{{ site.static_files | map:"to_liquid" | jsonify }}
