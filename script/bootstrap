@@ -1,3 +1,2 @@
 #! /bin/bash
-
-gem install builder
+bundle install -j8 $@
